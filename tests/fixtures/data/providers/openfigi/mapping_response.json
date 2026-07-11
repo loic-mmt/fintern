@@ -1,0 +1,32 @@
+[
+  {
+    "data": [
+      {
+        "ticker": "AAPL",
+        "name": "APPLE INC",
+        "exchCode": "US",
+        "currency": "USD",
+        "figi": "BBG000B9XRY4",
+        "compositeFIGI": "BBG000B9Y5X2",
+        "shareClassFIGI": "BBG001S5N8V8",
+        "securityType": "Common Stock",
+        "marketSector": "Equity"
+      }
+    ]
+  },
+  {
+    "data": [
+      {
+        "ticker": "MSFT",
+        "name": "MICROSOFT CORP",
+        "exchCode": "US",
+        "currency": "USD",
+        "figi": "BBG000BPH459",
+        "compositeFIGI": "BBG000BPH3J9",
+        "shareClassFIGI": "BBG001S5TD05",
+        "securityType": "Common Stock",
+        "marketSector": "Equity"
+      }
+    ]
+  }
+]

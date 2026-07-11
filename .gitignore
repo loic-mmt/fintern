@@ -25,3 +25,11 @@ htmlcov/
 .vscode/
 .idea/
 .DS_Store
+
+# Generated data
+*.csv
+*.json
+
+# Versioned test fixtures
+!tests/fixtures/**/*.csv
+!tests/fixtures/**/*.json
