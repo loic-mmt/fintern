@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import pandas as pd
-import numpy as np
+
 
 @dataclass(frozen = True)
 class Company:

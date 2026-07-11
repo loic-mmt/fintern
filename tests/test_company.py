@@ -1,8 +1,8 @@
 import pandas as pd
-
 import pytest
 
 from fintern import Company
+
 
 def test_ticker_is_normalized() -> None:
     prices = pd.Series([100.0, 110.0])
