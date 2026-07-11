@@ -6,6 +6,7 @@ import pytest
 
 from fintern.data import market as market_module
 from fintern.data.market import MarketData
+from fintern.data.providers.yahoo import _normalize_downloaded_market_data
 
 
 def _mock_yfinance_download_frame() -> pd.DataFrame:
@@ -126,10 +127,20 @@ def test_download_market_data_saves_partitioned_csv_dataset(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    downloaded_frame = _normalize_downloaded_market_data(
+        _mock_yfinance_download_frame(),
+        ["AAPL", "MSFT"],
+    )
+
+    class _DummyProvider:
+        def download_market_data(self, tickers, start=None, end=None, interval="1d"):
+            del tickers, start, end, interval
+            return downloaded_frame.copy()
+
     monkeypatch.setattr(
         market_module,
-        "_download_raw_market_data",
-        lambda tickers, start, end, interval: _mock_yfinance_download_frame(),
+        "get_provider",
+        lambda provider, capability: _DummyProvider(),
     )
 
     output_path = tmp_path / "csv-data"
@@ -177,10 +188,20 @@ def test_download_market_data_saves_partitioned_parquet_dataset(
 ) -> None:
     pytest.importorskip("pyarrow")
 
+    downloaded_frame = _normalize_downloaded_market_data(
+        _mock_yfinance_download_frame(),
+        ["AAPL", "MSFT"],
+    )
+
+    class _DummyProvider:
+        def download_market_data(self, tickers, start=None, end=None, interval="1d"):
+            del tickers, start, end, interval
+            return downloaded_frame.copy()
+
     monkeypatch.setattr(
         market_module,
-        "_download_raw_market_data",
-        lambda tickers, start, end, interval: _mock_yfinance_download_frame(),
+        "get_provider",
+        lambda provider, capability: _DummyProvider(),
     )
 
     output_path = tmp_path / "parquet-data"

@@ -37,6 +37,28 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+yahoo = [
+    "yfinance>=0.2",
+]
+sec = [
+    "requests>=2.32",
+]
+openfigi = [
+    "requests>=2.32",
+]
+fmp = [
+    "requests>=2.32",
+]
+eodhd = [
+    "requests>=2.32",
+]
+alpha-vantage = [
+    "requests>=2.32",
+]
+data = [
+    "yfinance>=0.2",
+    "requests>=2.32",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
@@ -57,6 +79,9 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
+]
+markers = [
+    "live_api: opt-in tests that hit external provider APIs",
 ]
 
 [tool.ruff]

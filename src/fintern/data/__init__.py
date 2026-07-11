@@ -1,18 +1,13 @@
-from fintern.company import Company
-from fintern.data import (
+from fintern.data.fundamentals import (
     FundamentalsData,
-    MarketData,
     build_company_dataset,
     download_fundamentals,
-    download_market_data,
     load_fundamentals,
-    load_instruments,
-    load_market_data,
-    resolve_instruments,
 )
+from fintern.data.instruments import load_instruments, resolve_instruments
+from fintern.data.market import MarketData, download_market_data, load_market_data
 
 __all__ = [
-    "Company",
     "FundamentalsData",
     "MarketData",
     "build_company_dataset",
@@ -23,4 +18,3 @@ __all__ = [
     "load_market_data",
     "resolve_instruments",
 ]
-__version__ = "0.1.0"
