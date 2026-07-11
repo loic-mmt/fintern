@@ -1,25 +1,34 @@
+<p align="center">
+  <img src="./Bandeau%20Fintern.png" alt="Fintern banner" />
+</p>
+
 # Fintern
 
-Fintern is an open-source Python library for explainable financial analysis.
+Fintern is an open-source Python toolkit for explainable financial analysis.
+It brings market data, fundamentals, instrument identifiers, and transparent
+analytics together in one consistent workflow.
 
-It aims to transform market and fundamental data into:
+Fintern is designed for analysts, researchers, and developers who want financial
+calculations they can inspect, understand, and extend. Data provenance, joins,
+and analytical logic remain explicit at every step.
 
-- financial metrics;
-- historical comparisons;
-- peer comparisons;
-- red-flag detection;
-- transparent company scores;
-- analyst-style reports.
+## Capabilities
+
+- normalized market data downloads, storage, and retrieval
+- normalized financial statements and company profiles
+- instrument resolution across financial identifiers
+- explicit market and fundamentals alignment
+- company, return, risk, and valuation analytics
+- extensible providers and metrics architecture
+
+The roadmap expands these foundations into historical and peer comparisons,
+red-flag detection, transparent scoring, and analyst-style reporting.
 
 ## Installation
 
-```bash
-pip install fintern
-```
+Install the latest development version directly from source.
 
-Fintern is currently under active development and is not yet published on PyPI.
-
-## Development installation
+### Core install
 
 ```bash
 git clone https://github.com/loic-mmt/fintern.git
@@ -28,10 +37,37 @@ cd fintern
 python3 -m venv .venv
 source .venv/bin/activate
 
+python -m pip install -e .
+```
+
+### With development tools
+
+```bash
 python -m pip install -e ".[dev]"
 ```
 
-## Example
+### With data provider extras
+
+```bash
+python -m pip install -e ".[data]"
+```
+
+Available extras:
+
+| Extra | Purpose |
+| --- | --- |
+| `yahoo` | Yahoo Finance market data via `yfinance` |
+| `sec` | SEC fundamentals via `requests` |
+| `openfigi` | OpenFIGI instrument mapping via `requests` |
+| `fmp` | Scaffolded adapter |
+| `eodhd` | Scaffolded adapter |
+| `alpha-vantage` | Scaffolded adapter |
+| `data` | Convenience extra for current v1 data stack |
+| `dev` | Testing, linting, and packaging tools |
+
+## Quickstart
+
+### Company analysis
 
 ```python
 import pandas as pd
@@ -39,18 +75,149 @@ import pandas as pd
 from fintern import Company
 
 prices = pd.Series([100.0, 105.0, 110.0])
-
 company = Company("AAPL", prices)
 
+print(company.returns())
 print(company.total_return())
 ```
 
-## Run tests
+### Market data
+
+```python
+from fintern import download_market_data
+
+market = download_market_data(
+    tickers=["AAPL", "MSFT"],
+    start="2025-01-01",
+    end="2025-03-31",
+    provider="yahoo",
+)
+
+print(market.head())
+```
+
+### Fundamentals data
+
+```python
+from fintern import download_fundamentals
+
+fundamentals = download_fundamentals(
+    tickers="AAPL",
+    provider="sec",
+)
+
+print(fundamentals["statements"].head())
+print(fundamentals["company_profile"].head())
+```
+
+### Build a combined dataset explicitly
+
+```python
+from fintern import (
+    build_company_dataset,
+    download_fundamentals,
+    download_market_data,
+)
+
+market = download_market_data(
+    "AAPL",
+    start="2025-01-01",
+    end="2025-06-30",
+    provider="yahoo",
+)
+fundamentals = download_fundamentals("AAPL", provider="sec")
+
+dataset = build_company_dataset(
+    market_data=market,
+    fundamentals=fundamentals,
+    join="asof",
+)
+
+print(dataset.head())
+```
+
+## Data Providers
+
+Provider roles are intentionally explicit:
+
+- `Yahoo`
+  Market prices only.
+- `SEC`
+  Fundamentals only.
+- `OpenFIGI`
+  Instrument resolution only.
+
+This separation keeps data provenance clear and lets each source serve the
+capability it handles best.
+
+## Provider Configuration
+
+Depending on the provider, you may need optional dependencies and environment
+variables.
+
+Common variables:
+
+- `FINTERN_OPENFIGI_API_KEY`
+- `FINTERN_OPENFIGI_USER_AGENT`
+- `FINTERN_SEC_USER_AGENT`
+- `FINTERN_FMP_API_KEY`
+- `FINTERN_EODHD_API_KEY`
+- `FINTERN_ALPHA_VANTAGE_API_KEY`
+
+If a requested provider cannot be used, Fintern raises a clear error explaining
+whether the issue is:
+
+- missing dependency
+- missing API key / environment variable
+- unsupported capability
+- no compatible provider available
+
+## Storage Model
+
+Fintern supports both in-memory use and save/load workflows.
+
+- market datasets can be saved as single files or partitioned datasets
+- fundamentals are stored as a multi-table dataset
+- instrument mappings are stored as a flat table
+
+By default, the library keeps:
+
+- market data separate from fundamentals
+- fundamentals separate from instrument mapping
+
+If you want a combined analysis table, use `build_company_dataset(...)`
+explicitly rather than a naive row-wise concat.
+
+## Documentation
+
+- [Data Layer Architecture](./docs/data-layer.md)
+
+## Development
+
+Run the test suite:
 
 ```bash
-pytest
+pytest -p no:cacheprovider
 ```
+
+Run linting:
+
+```bash
+ruff check src tests
+```
+
+Some tests are intentionally optional:
+
+- live API tests are opt-in only
+- parquet tests are skipped when `pyarrow` is not installed
+
+## Status
+
+Fintern is actively developed around a modular data and analytics architecture.
+Its public API may evolve as new providers, metrics, and analysis workflows are
+added.
 
 ## Disclaimer
 
-Fintern is intended for research and educational purposes. It does not provide investment advice.
+Fintern is intended for research and educational purposes. It does not provide
+investment advice.
