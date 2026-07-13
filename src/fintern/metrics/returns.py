@@ -96,7 +96,6 @@ class Returns:
 
         return overnight
 
-
     def intraday_returns(self) -> pd.Series:
         """Calculate same-day returns from open to close."""
         daily_ohlc = self._daily_open_close()
@@ -117,15 +116,17 @@ class Returns:
 
         return df
 
-
     def log_returns(self) -> pd.Series:
         """Calculate logarithmic returns"""
         return np.log(self.prices / self.prices.shift(1)).dropna()
-    
+
+    def cumulative_returns(self) -> pd.Series:
+        """Calculate cumulative compounded returns."""
+        return (1 + self.returns()).cumprod() - 1
 
     def cummulative_returns(self) -> pd.Series:
-        return (1 + self.returns()).cumprod() - 1
-    
+        """Compatibility alias for :meth:`cumulative_returns`."""
+        return self.cumulative_returns()
 
     def holding_period_return(self, start: str, end: str) -> float:
         """Calculate total return over a specified holding period."""
@@ -137,7 +138,6 @@ class Returns:
             raise ValueError("holding period must contain at least two prices")
 
         return float(period_prices.iloc[-1] / period_prices.iloc[0] - 1)
-    
 
     def rolling_returns(self, window: int) -> pd.Series:
         """Calculate rolling returns over a fixed window."""
@@ -148,7 +148,6 @@ class Returns:
             raise ValueError("window must be smaller than the number of prices")
 
         return self.prices.div(self.prices.shift(window)).sub(1).dropna()
-    
 
     def wealth_index(self, initial_value: float = 100) -> pd.Series:
         """Create a wealth index from periodic returns."""
@@ -156,12 +155,10 @@ class Returns:
             raise ValueError("initial_value must be strictly positive")
 
         return initial_value * (1 + self.returns()).cumprod()
-    
 
-    def exces_returns(self, benchmark_returns: pd.Series | float) -> pd.Series:
+    def excess_returns(self, benchmark_returns: pd.Series | float) -> pd.Series:
         """Calculate returns in excess of a benchmark or fixed rate."""
         return self.returns().subtract(benchmark_returns).dropna()
-    
 
     def simple_to_log_returns(self) -> pd.Series:
         """Convert simple returns into logarithmic returns."""
@@ -172,20 +169,21 @@ class Returns:
 
         return np.log1p(simple_returns)
 
-
     def log_to_simple_returns(self) -> pd.Series:
         """Convert logarithmic returns into simple returns."""
         return np.expm1(self.log_returns())
 
-
-    def CAGR(self) -> float:
+    def cagr(self) -> float:
         """Calculate the compound annual growth rate."""
         total_days = len(self.prices)
         number_of_years = total_days / 252
         first_price = self.prices.iloc[0]
         last_price = self.prices.iloc[-1]
         return float((last_price / first_price) ** (1 / number_of_years) - 1)
-    
+
+    def CAGR(self) -> float:
+        """Compatibility alias for :meth:`cagr`."""
+        return self.cagr()
 
     def forward_returns(self, periods: int = 1) -> pd.Series:
         """Calculate future returns over a specified horizon."""

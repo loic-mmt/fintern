@@ -189,12 +189,9 @@ class Risk:
             raise ValueError("high and low prices must be strictly positive")
 
         if (ticker_data["high"] < ticker_data["low"]).any():
-            raise ValueError(
-                "high prices must be greater than or equal to low prices"
-            )
+            raise ValueError("high prices must be greater than or equal to low prices")
 
         return ticker_data
-    
 
     def _ticker_ohlc(self) -> pd.DataFrame:
         required_columns = {"date", "ticker", "high", "low", "open", "close"}
@@ -226,9 +223,7 @@ class Risk:
             raise ValueError("prices must be strictly positive")
 
         if (ticker_data["high"] < ticker_data["low"]).any():
-            raise ValueError(
-                "high prices must be greater than or equal to low prices"
-            )
+            raise ValueError("high prices must be greater than or equal to low prices")
 
         if (
             (ticker_data["open"] > ticker_data["high"]).any()
@@ -236,9 +231,7 @@ class Risk:
             or (ticker_data["close"] > ticker_data["high"]).any()
             or (ticker_data["close"] < ticker_data["low"]).any()
         ):
-            raise ValueError(
-                "open and close prices must lie between low and high"
-            )
+            raise ValueError("open and close prices must lie between low and high")
 
         return ticker_data
 
@@ -249,8 +242,7 @@ class Risk:
 
         if not is_daily_or_finer(detected_frequency):
             raise ValueError(
-                "parkinson_volatility requires market data at daily frequency "
-                "or finer"
+                "parkinson_volatility requires market data at daily frequency or finer"
             )
 
         daily_high_low = ticker_data.resample("B").agg({"high": "max", "low": "min"})
@@ -287,9 +279,8 @@ class Risk:
         volatility.index.name = None
 
         return volatility
-    
 
-    def rolling_garmanKlass_volatility(self, window: int) -> pd.Series:
+    def rolling_garman_klass_volatility(self, window: int) -> pd.Series:
         """Calculate rolling Garman-Klass volatility on the native bar frequency."""
         if window <= 0:
             raise ValueError("window must be strictly positive")
@@ -300,12 +291,9 @@ class Risk:
             raise ValueError("window must be smaller than or equal to observations")
 
         log_ranges_squared = np.log(ticker_data["high"] / ticker_data["low"]) ** 2
-        log_open_close_squared = (
-            np.log(ticker_data["close"] / ticker_data["open"]) ** 2
-        )
+        log_open_close_squared = np.log(ticker_data["close"] / ticker_data["open"]) ** 2
         bar_variance = (
-            0.5 * log_ranges_squared
-            - (2 * np.log(2) - 1) * log_open_close_squared
+            0.5 * log_ranges_squared - (2 * np.log(2) - 1) * log_open_close_squared
         )
 
         rolling_variance = bar_variance.rolling(window=window).mean().clip(lower=0.0)
@@ -315,3 +303,7 @@ class Risk:
         volatility.index.name = None
 
         return volatility
+
+    def rolling_garmanKlass_volatility(self, window: int) -> pd.Series:
+        """Compatibility alias for :meth:`rolling_garman_klass_volatility`."""
+        return self.rolling_garman_klass_volatility(window)

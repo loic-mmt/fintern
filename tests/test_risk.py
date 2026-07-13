@@ -47,9 +47,7 @@ def test_parkinson_volatility_from_daily_ohlc_data() -> None:
     risk = _make_risk(data)
 
     log_ranges = np.log(data["high"] / data["low"])
-    expected = float(
-        np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2)))
-    )
+    expected = float(np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2))))
 
     assert risk.parkinson_volatility() == pytest.approx(expected)
 
@@ -76,9 +74,7 @@ def test_parkinson_volatility_filters_to_requested_ticker() -> None:
 
     aapl = data.loc[data["ticker"] == "AAPL"]
     log_ranges = np.log(aapl["high"] / aapl["low"])
-    expected = float(
-        np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2)))
-    )
+    expected = float(np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2))))
 
     assert risk.parkinson_volatility() == pytest.approx(expected)
 
@@ -104,9 +100,7 @@ def test_parkinson_volatility_aggregates_intraday_data_to_daily_ranges() -> None
     daily_high = pd.Series([105.0, 108.0])
     daily_low = pd.Series([100.0, 102.0])
     log_ranges = np.log(daily_high / daily_low)
-    expected = float(
-        np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2)))
-    )
+    expected = float(np.sqrt(np.sum(log_ranges**2) / (4 * len(log_ranges) * np.log(2))))
 
     assert risk.parkinson_volatility() == pytest.approx(expected)
 
@@ -169,12 +163,8 @@ def test_rolling_parkinson_volatility_from_daily_ohlc_data() -> None:
     log_ranges_squared = np.log(data["high"] / data["low"]) ** 2
     expected = pd.Series(
         [
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))
-            ),
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))
-            ),
+            np.sqrt(np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))),
+            np.sqrt(np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))),
         ],
         index=pd.to_datetime(["2025-01-03", "2025-01-06"]),
     )
@@ -206,15 +196,9 @@ def test_rolling_parkinson_volatility_from_intraday_ohlc_data() -> None:
     log_ranges_squared = np.log(data["high"] / data["low"]) ** 2
     expected = pd.Series(
         [
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))
-            ),
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))
-            ),
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[2:4]) / (4 * 2 * np.log(2))
-            ),
+            np.sqrt(np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))),
+            np.sqrt(np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))),
+            np.sqrt(np.sum(log_ranges_squared.iloc[2:4]) / (4 * 2 * np.log(2))),
         ],
         index=pd.to_datetime(
             [
@@ -255,12 +239,8 @@ def test_rolling_parkinson_volatility_filters_to_requested_ticker() -> None:
     log_ranges_squared = np.log(aapl["high"] / aapl["low"]) ** 2
     expected = pd.Series(
         [
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))
-            ),
-            np.sqrt(
-                np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))
-            ),
+            np.sqrt(np.sum(log_ranges_squared.iloc[:2]) / (4 * 2 * np.log(2))),
+            np.sqrt(np.sum(log_ranges_squared.iloc[1:3]) / (4 * 2 * np.log(2))),
         ],
         index=pd.to_datetime(["2025-01-03", "2025-01-06"]),
     )
@@ -328,6 +308,10 @@ def test_rolling_garmanklass_volatility_from_daily_ohlc_data() -> None:
 
     pd.testing.assert_series_equal(
         risk.rolling_garmanKlass_volatility(window=2),
+        expected,
+    )
+    pd.testing.assert_series_equal(
+        risk.rolling_garman_klass_volatility(window=2),
         expected,
     )
 

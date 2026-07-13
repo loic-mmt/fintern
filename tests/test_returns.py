@@ -150,6 +150,15 @@ def test_cummulative_returns() -> None:
     pd.testing.assert_series_equal(returns.cummulative_returns(), expected)
 
 
+def test_cumulative_returns_uses_canonical_name() -> None:
+    returns = _make_returns()
+
+    pd.testing.assert_series_equal(
+        returns.cumulative_returns(),
+        returns.cummulative_returns(),
+    )
+
+
 def test_holding_period_return() -> None:
     returns = _make_returns()
 
@@ -188,7 +197,7 @@ def test_wealth_index() -> None:
     pd.testing.assert_series_equal(returns.wealth_index(), expected)
 
 
-def test_exces_returns_with_float_benchmark() -> None:
+def test_excess_returns_with_float_benchmark() -> None:
     returns = _make_returns()
 
     expected = pd.Series(
@@ -196,7 +205,16 @@ def test_exces_returns_with_float_benchmark() -> None:
         index=pd.to_datetime(["2025-01-03", "2025-01-06"]),
     )
 
-    pd.testing.assert_series_equal(returns.exces_returns(0.02), expected)
+    pd.testing.assert_series_equal(returns.s_returns(0.02), expected)
+
+
+def test_excess_returns_uses_canonical_name() -> None:
+    returns = _make_returns()
+
+    pd.testing.assert_series_equal(
+        returns.excess_returns(0.02),
+        returns.exces_returns(0.02),
+    )
 
 
 def test_simple_to_log_returns() -> None:
@@ -224,6 +242,7 @@ def test_cagr() -> None:
     expected = float((105.0 / 100.0) ** (1 / (3 / 252)) - 1)
 
     assert returns.CAGR() == pytest.approx(expected)
+    assert returns.cagr() == pytest.approx(expected)
 
 
 def test_forward_returns() -> None:
