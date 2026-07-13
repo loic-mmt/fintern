@@ -11,7 +11,7 @@ MetricCandidate = tuple[str | None, str]
 
 @dataclass(frozen=True)
 class MetricScaffoldBase:
-    """Shared input validation and extraction helpers for metric scaffolds."""
+    """Shared input validation and extraction helpers for financial metrics."""
 
     ticker: str
     prices: pd.Series | None = None
@@ -116,10 +116,7 @@ class MetricScaffoldBase:
 
         if missing_columns:
             missing = ", ".join(missing_columns)
-            raise ValueError(
-                "fundamentals statements must contain columns: "
-                f"{missing}"
-            )
+            raise ValueError(f"fundamentals statements must contain columns: {missing}")
 
         return statements
 
@@ -141,6 +138,7 @@ class MetricScaffoldBase:
         self,
         metric: str,
         statement: str | None = None,
+        date_column: str | None = None,
     ) -> pd.Series:
         """Return a time series for one normalized fundamentals metric."""
         ticker_rows = self._ticker_statements()
@@ -165,12 +163,19 @@ class MetricScaffoldBase:
                 f"and ticker={self.ticker}"
             )
 
-        date_column = "filed_date"
-        if (
-            date_column not in metric_rows.columns
-            or metric_rows[date_column].isna().all()
-        ):
-            date_column = "period_end"
+        if date_column is not None and date_column not in {
+            "filed_date",
+            "period_end",
+        }:
+            raise ValueError("date_column must be either `filed_date` or `period_end`")
+
+        if date_column is None:
+            date_column = "filed_date"
+            if (
+                date_column not in metric_rows.columns
+                or metric_rows[date_column].isna().all()
+            ):
+                date_column = "period_end"
 
         if date_column not in metric_rows.columns:
             raise ValueError(
@@ -182,8 +187,7 @@ class MetricScaffoldBase:
 
         if metric_rows.empty:
             raise ValueError(
-                f"No dated values found for metric={metric!r} "
-                f"and ticker={self.ticker}"
+                f"No dated values found for metric={metric!r} and ticker={self.ticker}"
             )
 
         metric_rows = metric_rows.sort_values(date_column)
@@ -210,6 +214,7 @@ class MetricScaffoldBase:
     def _fundamental_metric_series_from_candidates(
         self,
         candidates: Sequence[MetricCandidate],
+        date_column: str | None = None,
     ) -> pd.Series:
         """Return first available fundamentals series from ordered candidates."""
         if not candidates:
@@ -222,14 +227,14 @@ class MetricScaffoldBase:
                 return self._fundamental_metric_series(
                     metric=metric,
                     statement=statement,
+                    date_column=date_column,
                 )
             except ValueError as exc:
                 last_error = exc
 
         metrics = ", ".join(metric for _, metric in candidates)
         raise ValueError(
-            "No fundamentals rows found for any candidate metrics: "
-            f"{metrics}"
+            f"No fundamentals rows found for any candidate metrics: {metrics}"
         ) from last_error
 
     def _latest_fundamental_value_from_candidates(

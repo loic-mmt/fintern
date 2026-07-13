@@ -18,7 +18,7 @@ and analytical logic remain explicit at every step.
 - normalized financial statements and company profiles
 - instrument resolution across financial identifiers
 - explicit market and fundamentals alignment
-- company, return, risk, and valuation analytics
+- company, return, risk, growth, profitability, and valuation analytics
 - extensible providers and metrics architecture
 
 The roadmap expands these foundations into historical and peer comparisons,

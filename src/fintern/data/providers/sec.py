@@ -15,9 +15,20 @@ _STATEMENT_BY_METRIC = {
     "RevenueFromContractWithCustomerExcludingAssessedTax": "income_statement",
     "SalesRevenueNet": "income_statement",
     "CostOfGoodsSold": "income_statement",
+    "CostOfRevenue": "income_statement",
     "GrossProfit": "income_statement",
     "OperatingIncomeLoss": "income_statement",
     "NetIncomeLoss": "income_statement",
+    "ProfitLoss": "income_statement",
+    "IncomeTaxExpenseBenefit": "income_statement",
+    (
+        "IncomeLossFromContinuingOperationsBeforeIncomeTaxes"
+        "ExtraordinaryItemsNoncontrollingInterest"
+    ): "income_statement",
+    (
+        "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterest"
+        "AndIncomeLossFromEquityMethodInvestments"
+    ): "income_statement",
     "EarningsPerShareBasic": "income_statement",
     "EarningsPerShareDiluted": "income_statement",
     "EarningsBeforeInterestTaxesDepreciationAndAmortization": "income_statement",
@@ -26,6 +37,9 @@ _STATEMENT_BY_METRIC = {
     "Liabilities": "balance_sheet",
     "LiabilitiesCurrent": "balance_sheet",
     "StockholdersEquity": "balance_sheet",
+    (
+        "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"
+    ): "balance_sheet",
     "CommonStockSharesOutstanding": "balance_sheet",
     "CashAndCashEquivalentsAtCarryingValue": "balance_sheet",
     "LongTermDebtAndCapitalLeaseObligations": "balance_sheet",
@@ -43,6 +57,7 @@ _STATEMENT_BY_METRIC = {
     "NetCashProvidedByUsedInInvestingActivities": "cash_flow",
     "NetCashProvidedByUsedInFinancingActivities": "cash_flow",
     "PaymentsToAcquirePropertyPlantAndEquipment": "cash_flow",
+    "PaymentsToAcquireProductiveAssets": "cash_flow",
     "DepreciationDepletionAndAmortization": "cash_flow",
     "DepreciationAmortizationAndAccretionNet": "cash_flow",
     "Depreciation": "cash_flow",
@@ -145,9 +160,7 @@ class SECProvider(ProviderBase):
                                 "period_end": pd.to_datetime(observation.get("end")),
                                 "fiscal_year": observation.get("fy"),
                                 "fiscal_period": observation.get("fp"),
-                                "filed_date": pd.to_datetime(
-                                    observation.get("filed")
-                                ),
+                                "filed_date": pd.to_datetime(observation.get("filed")),
                                 "form": observation.get("form"),
                                 "frame": observation.get("frame"),
                                 "accession_number": observation.get("accn"),
@@ -180,9 +193,13 @@ class SECProvider(ProviderBase):
             ],
         )
         if not statements_frame.empty:
-            statements_frame = statements_frame.drop_duplicates().sort_values(
-                ["ticker", "statement", "metric", "period_end", "filed_date"]
-            ).reset_index(drop=True)
+            statements_frame = (
+                statements_frame.drop_duplicates()
+                .sort_values(
+                    ["ticker", "statement", "metric", "period_end", "filed_date"]
+                )
+                .reset_index(drop=True)
+            )
 
         profile_frame = pd.DataFrame(
             [
@@ -207,9 +224,7 @@ class SECProvider(ProviderBase):
     ) -> NormalizedFundamentals:
         self.ensure_available("fundamentals")
         requested_statements = (
-            {statement.lower() for statement in statements}
-            if statements
-            else None
+            {statement.lower() for statement in statements} if statements else None
         )
         statement_frames: list[pd.DataFrame] = []
         profile_frames: list[pd.DataFrame] = []
