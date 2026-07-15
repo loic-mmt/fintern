@@ -28,6 +28,9 @@ _STATEMENT_COLUMN_ORDER = [
     "accession_number",
     "taxonomy",
     "provider",
+    "period_type",
+    "is_derived",
+    "derivation",
 ]
 
 
@@ -296,8 +299,7 @@ def build_company_dataset(
         if missing_columns:
             missing = ", ".join(sorted(missing_columns))
             raise ValueError(
-                "Fundamentals statements are missing required columns: "
-                f"{missing}"
+                f"Fundamentals statements are missing required columns: {missing}"
             )
 
         join_key = (

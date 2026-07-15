@@ -66,9 +66,7 @@ _DEPRECIATION_AND_AMORTIZATION_CANDIDATES: tuple[MetricCandidate, ...] = (
     ("cash_flow", "DepreciationDepletionAndAmortization"),
     ("cash_flow", "DepreciationAmortizationAndAccretionNet"),
 )
-_DEPRECIATION_CANDIDATES: tuple[MetricCandidate, ...] = (
-    ("cash_flow", "Depreciation"),
-)
+_DEPRECIATION_CANDIDATES: tuple[MetricCandidate, ...] = (("cash_flow", "Depreciation"),)
 _AMORTIZATION_CANDIDATES: tuple[MetricCandidate, ...] = (
     ("cash_flow", "AmortizationOfIntangibleAssets"),
 )
@@ -93,6 +91,7 @@ class Valuation(MetricScaffoldBase):
     prices: pd.Series | None = None
     data: pd.DataFrame | None = None
     fundamentals: FundamentalsInput = None
+    as_of: str | pd.Timestamp | None = None
 
     def _latest_shares_outstanding(self) -> float:
         """Return latest available shares outstanding."""
@@ -186,9 +185,7 @@ class Valuation(MetricScaffoldBase):
             return self._latest_fundamental_value_from_candidates(_EBITDA_CANDIDATES)
         except ValueError:
             operating_income = self._latest_operating_income()
-            depreciation_and_amortization = (
-                self._latest_depreciation_and_amortization()
-            )
+            depreciation_and_amortization = self._latest_depreciation_and_amortization()
             return float(operating_income + depreciation_and_amortization)
 
     def market_cap(self) -> float:

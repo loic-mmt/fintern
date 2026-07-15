@@ -18,11 +18,13 @@ and analytical logic remain explicit at every step.
 - normalized financial statements and company profiles
 - instrument resolution across financial identifiers
 - explicit market and fundamentals alignment
+- fiscal-period normalization and trailing-twelve-month fundamentals
 - company, return, risk, growth, profitability, and valuation analytics
+- historical analysis and explainable red-flag detection
 - extensible providers and metrics architecture
 
-The roadmap expands these foundations into historical and peer comparisons,
-red-flag detection, transparent scoring, and analyst-style reporting.
+The roadmap expands these foundations into peer comparisons, transparent
+scoring, valuation workflows, and analyst-style reporting.
 
 ## Installation
 
@@ -135,6 +137,26 @@ dataset = build_company_dataset(
 
 print(dataset.head())
 ```
+
+### Normalize fiscal periods and build TTM fundamentals
+
+```python
+from fintern import build_ttm_fundamentals, select_fundamental_periods
+
+quarterly = select_fundamental_periods(
+    fundamentals,
+    frequency="quarterly",
+    as_of="2025-06-30",
+)
+ttm = build_ttm_fundamentals(
+    fundamentals,
+    as_of="2025-06-30",
+)
+```
+
+Quarterly selection separates discrete quarters from YTD and annual facts,
+keeps the latest filing available at `as_of`, and derives missing discrete
+quarters when sufficient cumulative facts exist.
 
 ## Data Providers
 

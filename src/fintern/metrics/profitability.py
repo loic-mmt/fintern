@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from fintern.data.periods import FiscalFrequency
 from fintern.metrics._base import (
     FundamentalsInput,
     MetricCandidate,
@@ -87,11 +88,14 @@ class Profitability(MetricScaffoldBase):
     prices: pd.Series | None = None
     data: pd.DataFrame | None = None
     fundamentals: FundamentalsInput = None
+    as_of: str | pd.Timestamp | None = None
+    frequency: FiscalFrequency = "quarterly"
 
     def _series(self, candidates: tuple[MetricCandidate, ...]) -> pd.Series:
         return self._fundamental_metric_series_from_candidates(
             candidates,
             date_column="period_end",
+            frequency=self.frequency,
         )
 
     @staticmethod

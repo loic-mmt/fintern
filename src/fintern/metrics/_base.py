@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from fintern.data.periods import FiscalFrequency, select_fundamental_periods
+
 FundamentalsInput = pd.DataFrame | Mapping[str, pd.DataFrame] | None
 MetricCandidate = tuple[str | None, str]
 
@@ -17,6 +19,7 @@ class MetricScaffoldBase:
     prices: pd.Series | None = None
     data: pd.DataFrame | None = None
     fundamentals: FundamentalsInput = None
+    as_of: str | pd.Timestamp | None = None
 
     def __post_init__(self) -> None:
         normalized_ticker = self.ticker.strip().upper()
@@ -139,23 +142,47 @@ class MetricScaffoldBase:
         metric: str,
         statement: str | None = None,
         date_column: str | None = None,
+        frequency: FiscalFrequency | None = None,
     ) -> pd.Series:
         """Return a time series for one normalized fundamentals metric."""
         ticker_rows = self._ticker_statements()
 
-        metric_rows = ticker_rows.loc[
-            ticker_rows["metric"].astype(str) == metric
-        ].copy()
+        def _metric_rows(frame: pd.DataFrame) -> pd.DataFrame:
+            rows = frame.loc[frame["metric"].astype(str) == metric].copy()
 
-        if statement is not None:
-            if "statement" not in metric_rows.columns:
-                raise ValueError(
-                    "fundamentals statements must contain a `statement` column"
+            if statement is not None:
+                if "statement" not in rows.columns:
+                    raise ValueError(
+                        "fundamentals statements must contain a `statement` column"
+                    )
+
+                rows = rows.loc[rows["statement"].astype(str) == statement].copy()
+
+            return rows
+
+        if frequency is not None or self.as_of is not None:
+            selected = select_fundamental_periods(
+                ticker_rows,
+                frequency=frequency or "all",
+                as_of=self.as_of,
+            )
+            metric_rows = _metric_rows(selected)
+
+            if metric_rows.empty and frequency is not None:
+                available = select_fundamental_periods(
+                    ticker_rows,
+                    frequency="all",
+                    as_of=self.as_of,
                 )
+                fallback_rows = _metric_rows(available)
 
-            metric_rows = metric_rows.loc[
-                metric_rows["statement"].astype(str) == statement
-            ].copy()
+                if (
+                    not fallback_rows.empty
+                    and fallback_rows["period_type"].eq("unknown").all()
+                ):
+                    metric_rows = fallback_rows
+        else:
+            metric_rows = _metric_rows(ticker_rows)
 
         if metric_rows.empty:
             raise ValueError(
@@ -215,6 +242,7 @@ class MetricScaffoldBase:
         self,
         candidates: Sequence[MetricCandidate],
         date_column: str | None = None,
+        frequency: FiscalFrequency | None = None,
     ) -> pd.Series:
         """Return first available fundamentals series from ordered candidates."""
         if not candidates:
@@ -228,6 +256,7 @@ class MetricScaffoldBase:
                     metric=metric,
                     statement=statement,
                     date_column=date_column,
+                    frequency=frequency,
                 )
             except ValueError as exc:
                 last_error = exc

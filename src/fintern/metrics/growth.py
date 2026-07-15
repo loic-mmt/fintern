@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from fintern.data.periods import FiscalFrequency
 from fintern.metrics._base import (
     FundamentalsInput,
     MetricCandidate,
@@ -47,6 +48,8 @@ class Growth(MetricScaffoldBase):
     prices: pd.Series | None = None
     data: pd.DataFrame | None = None
     fundamentals: FundamentalsInput = None
+    as_of: str | pd.Timestamp | None = None
+    frequency: FiscalFrequency = "quarterly"
 
     @staticmethod
     def _validate_periods(periods: int) -> None:
@@ -87,6 +90,7 @@ class Growth(MetricScaffoldBase):
         values = self._fundamental_metric_series_from_candidates(
             candidates,
             date_column="period_end",
+            frequency=self.frequency,
         )
         return self._growth_rate(values, periods=periods, name=name)
 
@@ -153,10 +157,12 @@ class Growth(MetricScaffoldBase):
         operating_cash_flow = self._fundamental_metric_series_from_candidates(
             _OPERATING_CASH_FLOW_CANDIDATES,
             date_column="period_end",
+            frequency=self.frequency,
         )
         capex = self._fundamental_metric_series_from_candidates(
             _CAPEX_CANDIDATES,
             date_column="period_end",
+            frequency=self.frequency,
         )
         aligned = pd.concat(
             {
