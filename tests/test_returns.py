@@ -205,7 +205,7 @@ def test_excess_returns_with_float_benchmark() -> None:
         index=pd.to_datetime(["2025-01-03", "2025-01-06"]),
     )
 
-    pd.testing.assert_series_equal(returns.s_returns(0.02), expected)
+    pd.testing.assert_series_equal(returns.excess_returns(0.02), expected)
 
 
 def test_excess_returns_uses_canonical_name() -> None:

@@ -160,6 +160,10 @@ class Returns:
         """Calculate returns in excess of a benchmark or fixed rate."""
         return self.returns().subtract(benchmark_returns).dropna()
 
+    def exces_returns(self, benchmark_returns: pd.Series | float) -> pd.Series:
+        """Compatibility alias for :meth:`excess_returns`."""
+        return self.excess_returns(benchmark_returns)
+
     def simple_to_log_returns(self) -> pd.Series:
         """Convert simple returns into logarithmic returns."""
         simple_returns = self.returns()
