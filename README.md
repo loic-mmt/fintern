@@ -20,11 +20,11 @@ and analytical logic remain explicit at every step.
 - explicit market and fundamentals alignment
 - fiscal-period normalization and trailing-twelve-month fundamentals
 - company, return, risk, growth, profitability, and valuation analytics
-- historical analysis and explainable red-flag detection
+- historical analysis, explainable red-flag detection, and transparent scoring
 - extensible providers and metrics architecture
 
-The roadmap expands these foundations into peer comparisons, transparent
-scoring, valuation workflows, and analyst-style reporting.
+The roadmap expands these foundations into peer comparisons, valuation
+workflows, and analyst-style reporting.
 
 ## Installation
 
@@ -157,6 +157,26 @@ ttm = build_ttm_fundamentals(
 Quarterly selection separates discrete quarters from YTD and annual facts,
 keeps the latest filing available at `as_of`, and derives missing discrete
 quarters when sufficient cumulative facts exist.
+
+### Build an explainable company score
+
+```python
+from fintern import ScoringAnalysis
+
+analysis = ScoringAnalysis(
+    ticker="AAPL",
+    prices=market.set_index("date")["close"],
+    fundamentals=fundamentals,
+    as_of="2025-06-30",
+)
+score = analysis.score()
+
+print(score.total_score, score.grade, score.coverage)
+print(score.component_frame())
+```
+
+The result preserves every raw value, normalized component score, weight,
+missing-data status, explanation, and red-flag penalty used in aggregation.
 
 ## Data Providers
 
