@@ -1,8 +1,12 @@
 from fintern.analysis import (
+    CompanyScore,
     HistoricalAnalysis,
     RedFlag,
     RedFlagAnalysis,
     RedFlagThresholds,
+    ScoreComponent,
+    ScoringAnalysis,
+    ScoringConfig,
 )
 from fintern.company import Company
 from fintern.data import (
@@ -23,6 +27,7 @@ from fintern.metrics import Growth, Profitability, Returns, Risk, Valuation
 
 __all__ = [
     "Company",
+    "CompanyScore",
     "FundamentalsData",
     "Growth",
     "HistoricalAnalysis",
@@ -31,6 +36,9 @@ __all__ = [
     "RedFlag",
     "RedFlagAnalysis",
     "RedFlagThresholds",
+    "ScoreComponent",
+    "ScoringAnalysis",
+    "ScoringConfig",
     "Returns",
     "Risk",
     "Valuation",
